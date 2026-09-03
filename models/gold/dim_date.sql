@@ -39,13 +39,15 @@ enriched as (
         dayname(full_date)   as day_name,
 
         -- US Holiday flag, per doc. Only observed federal holidays that fall inside our date window (Apr-Sep 2024) are relevant.
-        case
-            when full_date = '2024-05-27' then true  -- Memorial Day
-            when full_date = '2024-06-19' then true  -- Juneteenth
-            when full_date = '2024-07-04' then true  -- Independence Day
-            when full_date = '2024-09-02' then true  -- Labor Day
-            else false
-        end as is_us_holiday,
+case
+    when full_date in (
+        '2024-05-27',  -- Memorial Day
+        '2024-06-19',  -- Juneteenth
+        '2024-07-04',  -- Independence Day
+        '2024-09-02'   -- Labor Day
+    ) then true
+    else false
+end as holiday_flag,
 
         -- Season, per standard meteorological definition
         case
