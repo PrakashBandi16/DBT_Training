@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: stg_orders
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: delivery_status
+        tests:
+          - accepted_values:
+              values: ['On Time', 'Delayed', 'Potentially Delayed', 'In Transit']
+              quote: true
+      - name: order_status
+        tests:
+          - accepted_values:
+              values: ['pending', 'completed', 'cancelled']
+              quote: true
+
+  - name: stg_customer
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]

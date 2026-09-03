@@ -1,0 +1,47 @@
+version: 2
+
+sources:
+  - name: bronze_ext
+    schema: bronze
+    tables:
+      - name: ext_customers
+        loaded_at_field: file_row_number
+        freshness:
+          warn_after: {count: 2, period: day}
+          error_after: {count: 5, period: day}
+
+      - name: ext_products
+        loaded_at_field: file_row_number
+        freshness:
+          warn_after: {count: 10, period: day}
+          error_after: {count: 20, period: day}
+
+      - name: ext_orders
+        loaded_at_field: file_row_number
+        freshness:
+          warn_after: {count: 2, period: day}
+          error_after: {count: 5, period: day}
+
+      - name: ext_stores
+        loaded_at_field: file_row_number
+        freshness:
+          warn_after: {count: 2, period: day}
+          error_after: {count: 5, period: day}
+
+      - name: ext_employees
+        loaded_at_field: file_row_number
+        freshness:
+          warn_after: {count: 2, period: day}
+          error_after: {count: 5, period: day}
+
+      - name: ext_campaigns
+        loaded_at_field: file_row_number
+        freshness:
+          warn_after: {count: 2, period: day}
+          error_after: {count: 5, period: day}
+
+      - name: ext_suppliers
+        loaded_at_field: file_row_number
+        freshness:
+          warn_after: {count: 2, period: day}
+          error_after: {count: 5, period: day}
