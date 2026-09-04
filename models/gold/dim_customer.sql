@@ -5,44 +5,35 @@
     )
 }}
 
-with customer_attributes as (
-
-    select * from {{ ref('stg_customer') }}
-
-),
-
-scd_tracking as (
-
-    select
-        customer_id,
-        dbt_valid_from,
-        dbt_valid_to
-    from {{ ref('snp_customer') }}
-    where dbt_valid_to is null
-
-)
-
 select
-    {{ dbt_utils.generate_surrogate_key(['ca.customer_id']) }} as customer_key,
-    ca.customer_id,
-    ca.full_name,
-    ca.email,
-    ca.phone,
-    ca.street,
-    ca.city,
-    ca.state,
-    ca.zip_code,
-    ca.country,
-    ca.age,
-    ca.age_segment,
-    ca.loyalty_tier,
-    ca.income_bracket,
-    ca.registration_date,
+    {{ dbt_utils.generate_surrogate_key(['customer_id', 'dbt_valid_from']) }} as customer_key,
 
-    st.dbt_valid_from as valid_from,
-    st.dbt_valid_to   as valid_to,
-    case when st.dbt_valid_to is null then true else false end as is_current
+    customer_id,
+    full_name,
+    email,
+    is_email_valid,
+    phone,
+    street,
+    city,
+    state,
+    zip_code,
+    country,
+    age,
+    age_segment,
+    loyalty_tier,
+    income_bracket,
+    marketing_opt_in,
+    occupation,
+    preferred_communication,
+    preferred_payment_method,
+    registration_date,
+    last_purchase_date,
+    total_purchases,
+    total_spend,
+    last_modified_date,
 
-from customer_attributes ca
-inner join scd_tracking st
-    on ca.customer_id = st.customer_id
+    dbt_valid_from as valid_from,
+    dbt_valid_to   as valid_to,
+    case when dbt_valid_to is null then true else false end as is_current
+
+from {{ ref('snp_customer') }}

@@ -9,9 +9,14 @@ with current_customers as (
 
     select
         customer_id,
-        raw_record
-    from {{ ref('snp_customer') }}
-    where dbt_valid_to is null
+        raw_record,
+        raw_record:last_modified_date::date as last_modified_date,
+        _loaded_at
+    from {{ ref('bronze_customers') }}
+    qualify row_number() over (
+        partition by customer_id
+        order by raw_record:last_modified_date::date desc, _loaded_at desc
+    ) = 1
 
 ),
 
@@ -48,15 +53,15 @@ cleaned as (
         end as email,
         (raw_record:email::string regexp '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$') as is_email_valid,
 
-        -- Phone normalization: strip everything except digits, keep last 10
-               -- Phone normalization: strip punctuation but keep digits AND masked 'X' characters,
+        -- Phone normalization: strip punctuation but keep digits AND masked 'X' characters,
         -- since source data uses X to redact the final digit of some phone numbers
         case
             when length(regexp_replace(upper(raw_record:phone::string), '[^0-9X]', '')) >= 10
                 then right(regexp_replace(upper(raw_record:phone::string), '[^0-9X]', ''), 10)
             else null
         end as phone,
-        -- Address standardization: trim + Title Case city, upper-case state/zip as-is
+
+        -- Address standardization
         initcap(trim(raw_record:address:city::string))    as city,
         upper(trim(raw_record:address:state::string))     as state,
         trim(raw_record:address:zip_code::string)          as zip_code,
@@ -75,7 +80,9 @@ cleaned as (
         try_to_date(raw_record:registration_date::string)       as registration_date,
         try_to_date(raw_record:last_purchase_date::string)       as last_purchase_date,
         raw_record:total_purchases::number                      as total_purchases,
-        raw_record:total_spend::number(12,2)                     as total_spend
+        raw_record:total_spend::number(12,2)                     as total_spend,
+
+        last_modified_date
 
     from current_customers
 
@@ -110,6 +117,7 @@ select
     registration_date,
     last_purchase_date,
     total_purchases,
-    total_spend
+    total_spend,
+    last_modified_date
 
 from cleaned
