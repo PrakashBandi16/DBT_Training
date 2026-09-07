@@ -62,3 +62,5 @@ end as holiday_flag,
 )
 
 select * from enriched
+
+-- CI/Merge workflow test comment
